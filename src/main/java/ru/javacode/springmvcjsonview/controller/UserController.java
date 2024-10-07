@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @JsonView(Views.UserSummary.class)
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
         User createdUser = userService.createUser(user);
@@ -35,30 +37,45 @@ public class UserController {
     }
 
     @PutMapping(path = "/{userId}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @JsonView(Views.UserSummary.class)
-    public ResponseEntity<User> updateUser(@PathVariable UUID userId,
+    public ResponseEntity<User> updateUser(@PathVariable Long userId,
                                            @Valid @RequestBody User user) {
         User updatedUser = userService.updateUser(userId, user);
         return ResponseEntity.ok(updatedUser);
     }
 
     @GetMapping(path = "/{userId}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('SUPER_ADMIN')")
     @JsonView(Views.UserDetails.class)
-    public ResponseEntity<User> getUserById(@PathVariable UUID userId) {
+    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
         User user = userService.getUserById(userId);
         return ResponseEntity.ok(user);
     }
 
     @DeleteMapping(path = "/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('SUPER_ADMIN')")
     @JsonView(Views.UserSummary.class)
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
+    }
+
+    @PutMapping("/unlock/{userId}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<User> unlockUserAccount(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+        user.setAccountNonLocked(true);
+        user.setFailedAttempts(0);
+        user.setLockTime(null);
+        userService.updateUser(userId, user);
+        return ResponseEntity.ok(user);
     }
 }

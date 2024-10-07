@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('SUPER_ADMIN')")
     @JsonView(Views.OrderSummary.class)
     public ResponseEntity<Order> createOrder(@Valid @RequestBody Order order) {
         Order createdOrder = orderService.createOrder(order);
@@ -35,27 +37,31 @@ public class OrderController {
     }
 
     @PutMapping(path = "/{orderId}")
+    @PreAuthorize("hasRole('MODERATOR') or hasRole('SUPER_ADMIN')")
     @JsonView(Views.OrderSummary.class)
-    public ResponseEntity<Order> updateOrder(@PathVariable UUID orderId,
+    public ResponseEntity<Order> updateOrder(@PathVariable Long orderId,
                                              @Valid @RequestBody Order order) {
         Order updatedOrder = orderService.updateOrder(orderId, order);
         return ResponseEntity.ok(updatedOrder);
     }
 
     @GetMapping(path = "/{orderId}")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('SUPER_ADMIN')")
     @JsonView(Views.OrderDetails.class)
-    public ResponseEntity<Order> getOrderById(@PathVariable UUID orderId) {
+    public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
         Order order = orderService.getOrderById(orderId);
         return ResponseEntity.ok(order);
     }
 
     @DeleteMapping(path = "/{orderId}")
-    public ResponseEntity<Void> deleteOrder(@PathVariable UUID orderId) {
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long orderId) {
         orderService.deleteOrder(orderId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('SUPER_ADMIN')")
     @JsonView(Views.OrderSummary.class)
     public ResponseEntity<List<Order>> getAllOrders() {
         List<Order> orders = orderService.getAllOrders();

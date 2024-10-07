@@ -2,6 +2,7 @@ package ru.javacode.springmvcjsonview.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.javacode.springmvcjsonview.exception.ResourceNotFoundException;
@@ -9,7 +10,6 @@ import ru.javacode.springmvcjsonview.model.User;
 import ru.javacode.springmvcjsonview.repository.UserRepository;
 
 import java.util.List;
-import java.util.UUID;
 
 @Transactional
 @Service
@@ -17,30 +17,31 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User createUser(User user) {
-        user.setUserId(null);
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
         return userRepository.save(user);
     }
 
     @Override
-    public User updateUser(UUID userId, User user) {
-        User userToUpdate = getUserById(userId);
-        userToUpdate.setUsername(user.getUsername());
-        userToUpdate.setEmail(user.getEmail());
-        return userRepository.save(user);
+    public User updateUser(Long userId, User user) {
+        User userToUpdate = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(
+                "User with id " + userId + " not found"));
+        return userRepository.save(updateRows(userToUpdate, user));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public User getUserById(UUID userId) {
+    public User getUserById(Long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException(
                 "User with id " + userId + " not found"));
     }
 
     @Override
-    public void deleteUser(UUID userId) {
+    public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }
 
@@ -48,5 +49,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    private User updateRows(User updatedUser, User userToUpdate) {
+
+        if (userToUpdate.getName() != null) {
+            updatedUser.setName(userToUpdate.getName());
+        }
+        if (userToUpdate.getEmail() != null) {
+            updatedUser.setEmail(userToUpdate.getEmail());
+        }
+        if (userToUpdate.getPassword() != null) {
+            updatedUser.setPassword(userToUpdate.getPassword());
+        }
+
+        if (userToUpdate.getPassword().matches("^\\$2[ayb]\\$.{56}$")) {
+            updatedUser.setPassword(userToUpdate.getPassword());
+        } else {
+            String encodedPassword = passwordEncoder.encode(userToUpdate.getPassword());
+            updatedUser.setPassword(encodedPassword);
+        }
+        return updatedUser;
     }
 }

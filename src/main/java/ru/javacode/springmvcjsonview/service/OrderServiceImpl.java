@@ -19,12 +19,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order createOrder(Order order) {
-        order.setOrderId(null);
         return orderRepository.save(order);
     }
 
     @Override
-    public Order updateOrder(UUID orderId, Order order) {
+    public Order updateOrder(Long orderId, Order order) {
         Order orderToUpdate = getOrderById(orderId);
         orderToUpdate.setAmount(order.getAmount());
         orderToUpdate.setOrderStatus(order.getOrderStatus());
@@ -33,13 +32,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional(readOnly = true)
     @Override
-    public Order getOrderById(UUID orderId) {
+    public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId).orElseThrow(() -> new ResourceNotFoundException(
                 "Order with id " + orderId + " not found"));
     }
 
     @Override
-    public void deleteOrder(UUID orderId) {
+    public void deleteOrder(Long orderId) {
         orderRepository.deleteById(orderId);
     }
 

@@ -46,7 +46,7 @@ class OrderServiceImplTest {
     // Вспомогательный метод для создания тестового заказа
     private Order createTestOrder() {
         return Order.builder()
-                .orderId(UUID.randomUUID())
+                .orderId(1L)
                 .amount(new BigDecimal("99.99"))
                 .orderStatus(OrderStatus.PROCESSING)
                 .user(null) // В OrderSummary user не отображается
@@ -56,14 +56,14 @@ class OrderServiceImplTest {
     // Вспомогательный метод для создания детального заказа с пользователем
     private Order createDetailedTestOrder() {
         User user = User.builder()
-                .userId(UUID.randomUUID())
-                .username("testuser")
+                .userId(1L)
+                .name("testuser")
                 .email("testuser@example.com")
                 .orders(Collections.emptyList())
                 .build();
 
         return Order.builder()
-                .orderId(UUID.randomUUID())
+                .orderId(1L)
                 .amount(new BigDecimal("149.99"))
                 .orderStatus(OrderStatus.DELIVERY)
                 .user(user)
@@ -114,7 +114,7 @@ class OrderServiceImplTest {
         @DisplayName("Успешное обновление заказа")
         void updateOrder_Success() {
             // Arrange
-            UUID orderId = testOrder.getOrderId();
+            Long orderId = 1L;
             Order updatedInfo = Order.builder()
                     .amount(new BigDecimal("199.99"))
                     .orderStatus(OrderStatus.DELIVERY)
@@ -154,7 +154,7 @@ class OrderServiceImplTest {
         @DisplayName("Неудачное обновление заказа - заказ не найден")
         void updateOrder_OrderNotFound() {
             // Arrange
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 1L;
             Order updatedInfo = Order.builder()
                     .amount(new BigDecimal("199.99"))
                     .orderStatus(OrderStatus.DELIVERY)
@@ -180,7 +180,7 @@ class OrderServiceImplTest {
         @DisplayName("Успешное получение заказа по ID")
         void getOrderById_Success() {
             // Arrange
-            UUID orderId = testOrder.getOrderId();
+            Long orderId = testOrder.getOrderId();
             when(orderRepository.findById(orderId)).thenReturn(Optional.of(testOrder));
 
             // Act
@@ -199,7 +199,7 @@ class OrderServiceImplTest {
         @DisplayName("Неудачное получение заказа - заказ не найден")
         void getOrderById_OrderNotFound() {
             // Arrange
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 1L;
             when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
 
             // Act & Assert
@@ -221,7 +221,7 @@ class OrderServiceImplTest {
             // Arrange
             Order order1 = testOrder;
             Order order2 = createTestOrder();
-            order2.setOrderId(UUID.randomUUID());
+            order2.setOrderId(1L);
             order2.setAmount(new BigDecimal("150.00"));
             order2.setOrderStatus(OrderStatus.DELIVERY);
 

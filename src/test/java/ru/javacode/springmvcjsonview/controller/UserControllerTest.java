@@ -47,8 +47,8 @@ class UserControllerTest {
     // Вспомогательный метод для создания тестового пользователя
     private User createTestUser() {
         return User.builder()
-                .userId(UUID.randomUUID())
-                .username("testuser")
+                .userId(1L)
+                .name("testuser")
                 .email("testuser@example.com")
                 .orders(Collections.emptyList()) // Инициализируем пустым списком
                 .build();
@@ -63,7 +63,7 @@ class UserControllerTest {
         void createUser_Success() throws Exception {
             User user = createTestUser();
             User userToSave = User.builder()
-                    .username(user.getUsername())
+                    .name(user.getUsername())
                     .email(user.getEmail())
                     .build();
             when(userService.createUser(any(User.class))).thenReturn(user);
@@ -100,11 +100,11 @@ class UserControllerTest {
         @Test
         @DisplayName("Успешное обновление пользователя")
         void updateUser_Success() throws Exception {
-            UUID userId = UUID.randomUUID();
+            Long userId = 1L;
             User existingUser = createTestUser();
             User updatedUser = User.builder()
                     .userId(userId)
-                    .username("updatedUser")
+                    .name("updatedUser")
                     .email("updated@example.com")
                     .orders(Collections.emptyList())
                     .build();
@@ -125,9 +125,9 @@ class UserControllerTest {
         @Test
         @DisplayName("Неудачное обновление пользователя - пользователь не найден")
         void updateUser_NotFound() throws Exception {
-            UUID userId = UUID.randomUUID();
+            Long userId = 1L;
             User updatedUser = User.builder()
-                    .username("updatedUser")
+                    .name("updatedUser")
                     .email("updated@example.com")
                     .build();
 
@@ -146,7 +146,7 @@ class UserControllerTest {
         void updateUser_ValidationFailure() throws Exception {
             UUID userId = UUID.randomUUID();
             User invalidUser = User.builder()
-                    .username("") // Пустое имя
+                    .name("") // Пустое имя
                     .email("invalid-email") // Неверный формат email
                     .build();
 
@@ -164,11 +164,11 @@ class UserControllerTest {
         @Test
         @DisplayName("Успешное получение пользователя по ID")
         void getUserById_Success() throws Exception {
-            UUID userId = UUID.randomUUID();
+            Long userId = 1L;
             List<Order> orders = Arrays.asList();
             User user = User.builder()
                     .userId(userId)
-                    .username("testuser")
+                    .name("testuser")
                     .email("testuser@example.com")
                     .orders(orders)
                     .build();
@@ -187,7 +187,7 @@ class UserControllerTest {
         @Test
         @DisplayName("Неудачное получение пользователя - не найдено")
         void getUserById_NotFound() throws Exception {
-            UUID userId = UUID.randomUUID();
+            Long userId = 1L;
 
             when(userService.getUserById(userId))
                     .thenThrow(new ResourceNotFoundException("User with id " + userId + " not found"));
@@ -205,7 +205,7 @@ class UserControllerTest {
         @Test
         @DisplayName("Успешное удаление пользователя")
         void deleteUser_Success() throws Exception {
-            UUID userId = UUID.randomUUID();
+            Long userId = 1L;
             doNothing().when(userService).deleteUser(userId);
 
             mockMvc.perform(delete("/api/v1/users/{userId}", userId))
@@ -215,7 +215,7 @@ class UserControllerTest {
         @Test
         @DisplayName("Неудачное удаление пользователя - не найдено")
         void deleteUser_NotFound() throws Exception {
-            UUID userId = UUID.randomUUID();
+            Long userId = 1L;
 
             // Предполагаем, что при попытке удалить несуществующего пользователя, сервис бросает ResourceNotFoundException
             org.mockito.Mockito.doThrow(new ResourceNotFoundException("User with id " + userId + " not found"))
@@ -236,8 +236,8 @@ class UserControllerTest {
         void getAllUsers_Success() throws Exception {
             User user1 = createTestUser();
             User user2 = User.builder()
-                    .userId(UUID.randomUUID())
-                    .username("anotherUser")
+                    .userId(2L)
+                    .name("anotherUser")
                     .email("another@example.com")
                     .orders(Collections.emptyList())
                     .build();

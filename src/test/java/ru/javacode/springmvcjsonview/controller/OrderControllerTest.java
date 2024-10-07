@@ -47,13 +47,13 @@ class OrderControllerTest {
     // Вспомогательный метод для создания тестового заказа
     private Order createTestOrder() {
         User user = User.builder()
-                .userId(UUID.randomUUID())
-                .username("testuser")
+                .userId(1L)
+                .name("testuser")
                 .email("testuser@example.com")
                 .orders(Collections.emptyList())
                 .build();
         return Order.builder()
-                .orderId(UUID.randomUUID())
+                .orderId(1L)
                 .amount(new BigDecimal("99.99"))
                 .orderStatus(OrderStatus.PROCESSING)
                 .user(user) // В UserSummary user не отображается
@@ -111,7 +111,7 @@ class OrderControllerTest {
         @Test
         @DisplayName("Успешное обновление заказа")
         void updateOrder_Success() throws Exception {
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 1L;
             Order existingOrder = createTestOrder();
             Order updatedOrder = Order.builder()
                     .orderId(orderId)
@@ -135,7 +135,7 @@ class OrderControllerTest {
         @Test
         @DisplayName("Неудачное обновление заказа - заказ не найден")
         void updateOrder_NotFound() throws Exception {
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 100L;
             Order updatedOrder = Order.builder()
                     .amount(new BigDecimal("199.99"))
                     .orderStatus(OrderStatus.DELIVERY)
@@ -175,7 +175,7 @@ class OrderControllerTest {
         @Test
         @DisplayName("Успешное получение заказа по ID")
         void getOrderById_Success() throws Exception {
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 1L;
             Order order = createTestOrder();
 
             when(orderService.getOrderById(orderId)).thenReturn(order);
@@ -192,7 +192,7 @@ class OrderControllerTest {
         @Test
         @DisplayName("Неудачное получение заказа - не найдено")
         void getOrderById_NotFound() throws Exception {
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 1L;
 
             when(orderService.getOrderById(orderId))
                     .thenThrow(new ResourceNotFoundException("Order with id " + orderId + " not found"));
@@ -210,7 +210,7 @@ class OrderControllerTest {
         @Test
         @DisplayName("Успешное удаление заказа")
         void deleteOrder_Success() throws Exception {
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 1L;
             doNothing().when(orderService).deleteOrder(orderId);
 
             mockMvc.perform(delete("/api/v1/orders/{orderId}", orderId))
@@ -220,7 +220,7 @@ class OrderControllerTest {
         @Test
         @DisplayName("Неудачное удаление заказа - не найдено")
         void deleteOrder_NotFound() throws Exception {
-            UUID orderId = UUID.randomUUID();
+            Long orderId = 1L;
 
             // Предполагаем, что при попытке удалить несуществующий заказ, сервис бросает ResourceNotFoundException
             org.mockito.Mockito.doThrow(new ResourceNotFoundException("Order with id " + orderId + " not found"))

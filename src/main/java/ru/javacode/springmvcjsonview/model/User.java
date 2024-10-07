@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -15,10 +18,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.javacode.springmvcjsonview.view.Views;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 
 @Entity
@@ -27,17 +33,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @Data
 @Builder
-public class User {
+public class User implements UserDetails {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "user_id", nullable = false)
     @JsonView(Views.UserSummary.class)
-    private UUID userId;
+    private Long userId;
 
     @NotBlank(message = "не указано имя")
     @Column(name = "user_name", nullable = false)
     @JsonView(Views.UserSummary.class)
-    private String username;
+    private String name;
 
     @NotNull(message = "не указан Email")
     @Email(message = "неправильный формат Email")
@@ -49,11 +56,54 @@ public class User {
     @JsonView(Views.UserDetails.class)
     List<Order> orders;
 
+    @Column(name = "user_password", nullable = false)
+    private String password;
 
-    @PrePersist
-    public void generateUUID() {
-        if (userId == null) {
-            userId = UUID.randomUUID();
-        }
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_role", nullable = false)
+    private Role role;
+
+    @Column(name = "is_account_non_locked", nullable = false)
+    private boolean isAccountNonLocked = true;
+
+    @Column(name = "failed_attempts")
+    private Integer failedAttempts;
+
+    @Column(name = "lock_time")
+    private Long lockTime;
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return this.isAccountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.getEmail();
     }
 }

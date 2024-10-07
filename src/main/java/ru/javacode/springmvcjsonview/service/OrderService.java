@@ -9,11 +9,11 @@ public interface OrderService {
 
     Order createOrder(Order order);
 
-    Order updateOrder(UUID orderId, Order order);
+    Order updateOrder(Long orderId, Order order);
 
-    Order getOrderById(UUID orderId);
+    Order getOrderById(Long orderId);
 
-    void deleteOrder(UUID orderId);
+    void deleteOrder(Long orderId);
 
     List<Order> getAllOrders();
 }

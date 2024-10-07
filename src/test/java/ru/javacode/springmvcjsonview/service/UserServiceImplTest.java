@@ -45,10 +45,10 @@ class UserServiceImplTest {
     // Вспомогательный метод для создания тестового пользователя
     private User createTestUser() {
         return User.builder()
-                .userId(UUID.randomUUID())
-                .username("testuser")
+                .userId(1L)
+                .name("testuser")
                 .email("testuser@example.com")
-                .orders(Arrays.asList()) // Инициализируем пустым списком
+                .orders(List.of()) // Инициализируем пустым списком
                 .build();
     }
 
@@ -61,7 +61,7 @@ class UserServiceImplTest {
         void createUser_Success() {
             // Arrange
             User userToSave = User.builder()
-                    .username(testUser.getUsername())
+                    .name(testUser.getUsername())
                     .email(testUser.getEmail())
                     .build();
 
@@ -94,16 +94,16 @@ class UserServiceImplTest {
         @DisplayName("Успешное обновление пользователя")
         void updateUser_Success() {
             // Arrange
-            UUID userId = testUser.getUserId();
+            Long userId = testUser.getUserId();
             User updatedInfo = User.builder()
-                    .username("updatedUser")
+                    .name("updatedUser")
                     .email("updated@example.com")
                     .build();
 
             // Создаем объект пользователя с обновленной информацией
             User updatedUser = User.builder()
                     .userId(userId)
-                    .username(updatedInfo.getUsername())
+                    .name(updatedInfo.getUsername())
                     .email(updatedInfo.getEmail())
                     .orders(testUser.getOrders()) // Сохраняем заказы
                     .build();
@@ -126,9 +126,9 @@ class UserServiceImplTest {
         @DisplayName("Неудачное обновление пользователя - пользователь не найден")
         void updateUser_UserNotFound() {
             // Arrange
-            UUID userId = UUID.randomUUID();
+            Long userId = 1L;
             User updatedInfo = User.builder()
-                    .username("updatedUser")
+                    .name("updatedUser")
                     .email("updated@example.com")
                     .build();
 
@@ -151,7 +151,7 @@ class UserServiceImplTest {
         @DisplayName("Успешное получение пользователя по ID")
         void getUserById_Success() {
             // Arrange
-            UUID userId = testUser.getUserId();
+            Long userId = testUser.getUserId();
             when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
             // Act
@@ -169,7 +169,7 @@ class UserServiceImplTest {
         @DisplayName("Неудачное получение пользователя - пользователь не найден")
         void getUserById_UserNotFound() {
             // Arrange
-            UUID userId = UUID.randomUUID();
+           Long userId = 1L;
             when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
             // Act & Assert
@@ -186,7 +186,7 @@ class UserServiceImplTest {
         @DisplayName("Успешное удаление пользователя")
         void deleteUser_Success() {
             // Arrange
-            UUID userId = testUser.getUserId();
+            Long userId = testUser.getUserId();
 
             // Act
             userService.deleteUser(userId);
@@ -205,8 +205,8 @@ class UserServiceImplTest {
                 // Arrange
                 User user1 = testUser;
                 User user2 = createTestUser();
-                user2.setUserId(UUID.randomUUID());
-                user2.setUsername("anotherUser");
+                user2.setUserId(2L);
+                user2.setName("anotherUser");
                 user2.setEmail("another@example.com");
 
                 List<User> users = Arrays.asList(user1, user2);

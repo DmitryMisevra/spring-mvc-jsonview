@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -30,9 +32,10 @@ import java.util.UUID;
 public class Order {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "order_id", nullable = false)
     @JsonView({Views.OrderSummary.class, Views.UserDetails.class})
-    private UUID orderId;
+    private Long orderId;
 
     @Column(name = "order_amount", nullable = false)
     @JsonView({Views.OrderSummary.class, Views.UserDetails.class})
@@ -51,11 +54,4 @@ public class Order {
     @NotNull(message = "не указан пользователь")
     private User user;
 
-
-    @PrePersist
-    public void generateUUID() {
-        if (orderId == null) {
-            orderId = UUID.randomUUID();
-        }
-    }
 }
